@@ -1,0 +1,24 @@
+
+require(tidyverse)
+require(rvest)
+
+consulta = function(stock){
+  cat("criando session...\n")
+  google_session <- html_session("https://www.google.com")
+  google_form <- html_form(google_session)
+  google_form <- google_form[[1]]
+  google_form <- set_values(google_form,
+                            'q' = stock)
+  google_submission <- submit_form(session  = google_session, 
+                                   form     = google_form, 
+                                   submit   = "btnG")
+  cat("scrapping...\n")
+  preco = google_submission %>% 
+    read_html() %>% 
+    html_text()
+  alvo = str_locate(preco, "Preço das ações")
+  alvo = str_sub(preco, alvo[,2]+1, alvo[2]+5) %>% str_replace(",", ".") %>% as.numeric()
+  cat("view price...\n")
+  return(alvo)
+}
+
